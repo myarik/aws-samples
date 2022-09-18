@@ -82,7 +82,6 @@ func Handler(ctx context.Context, request events.APIGatewayProxyRequest) (events
 		return rerror.WrapStatusCode(http.StatusInternalServerError, "")
 	}
 
-	// TODO check how to use dynamodb.GetItemInput
 	output, err := dynamodbClient.GetItem(ctx, &dynamodb.GetItemInput{
 		Key: map[string]typesDynamodb.AttributeValue{
 			"MediaId":   &typesDynamodb.AttributeValueMemberS{Value: mediaId},
