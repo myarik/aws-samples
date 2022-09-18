@@ -1,0 +1,267 @@
+service: service-${self:custom.service}
+
+plugins:
+  - serverless-prune-plugin
+  - serverless-iam-roles-per-function
+
+frameworkVersion: '3'
+
+custom:
+  service: media
+  mediaBucket: ${file(./config/common.yml):mediaBucket.name}
+  mediaPrefix: ${file(./config/common.yml):mediaBucket.prefix}
+
+  TopicName: ${self:custom.service}-${self:provider.stage}-event
+  ApiGatewayName: ${self:custom.service}-${self:provider.stage}
+  TableName: ${self:custom.service}-${self:provider.stage}-table
+
+  # Only keep last 3 version on AWS
+  prune:
+    automatic: true
+    number: 3
+
+  thumbnailSizes:
+    width: 370
+    height: 370
+
+provider:
+  name: aws
+  runtime: go1.x
+  region: ${file(./config/common.yml):region}
+  memorySize: 128
+  logRetentionInDays: 7
+  stage: production
+
+  deploymentBucket:
+    name: ${file(./config/common.yml):deploymentBucket.name}
+    serverSideEncryption: ${file(./config/common.yml):deploymentBucket.serverSideEncryption}
+
+  tags:
+    service: ${self:custom.service}
+    environment: ${self:provider.stage}
+
+  apiGateway:
+    restApiId: !Ref MediaApiGateway
+    restApiRootResourceId:
+      Fn::GetAtt:
+        - MediaApiGateway
+        - RootResourceId
+
+package:
+  patterns:
+    - '!./**'
+    - ./bin/**
+
+functions:
+  upload:
+    handler: bin/upload
+    environment:
+      MEDIA_BUCKET: ${self:custom.mediaBucket}
+      MEDIA_PREFIX: ${self:custom.mediaPrefix}
+      SNS_TOPIC_ARN: !Ref SNSTopic
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - s3:*
+        Resource:
+          - arn:aws:s3:::${self:custom.mediaBucket}/${self:custom.mediaPrefix}/*
+      - Effect: Allow
+        Action:
+          - sns:Publish
+        Resource: !Ref SNSTopic
+    events:
+      - http:
+          path: /v1/media/{id}
+          method: post
+          cors: true
+          request:
+            parameters:
+              paths:
+                id: true
+              headers:
+                Accept: true
+                Content-Type: true
+
+  db_save:
+    handler: bin/db_save
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:PutItem
+        Resource:
+          - Fn::GetAtt: [ MediaTable, Arn ]
+    environment:
+      TABLE_NAME: !Ref MediaTable
+    events:
+      - sns:
+          arn: !Ref SNSTopic
+          topicName: ${self:custom.TopicName}
+          filterPolicy:
+            event:
+              - MediaUploaded
+
+  generate_thumbnail:
+    handler: bin/generate_thumbnail
+    environment:
+      MEDIA_BUCKET: ${self:custom.mediaBucket}
+      THUMBNAIL_WIDTH: ${self:custom.thumbnailSizes.width}
+      THUMBNAIL_HEIGHT: ${self:custom.thumbnailSizes.height}
+      SNS_TOPIC_ARN: !Ref SNSTopic
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - s3:*
+        Resource:
+          - arn:aws:s3:::${self:custom.mediaBucket}/${self:custom.mediaPrefix}/*
+      - Effect: Allow
+        Action:
+          - sns:Publish
+          - sns:Subscribe
+        Resource: !Ref SNSTopic
+    events:
+      - sns:
+          arn: !Ref SNSTopic
+          topicName: ${self:custom.TopicName}
+          filterPolicy:
+            event:
+              - CreateThumbnail
+
+  db_thumbnail_save:
+    handler: bin/db_thumbnail_save
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:UpdateItem
+        Resource:
+          - Fn::GetAtt: [ MediaTable, Arn ]
+    environment:
+      TABLE_NAME: !Ref MediaTable
+    events:
+      - sns:
+          arn: !Ref SNSTopic
+          topicName: ${self:custom.TopicName}
+          filterPolicy:
+            event:
+              - ThumbnailCreated
+
+  list:
+    handler: bin/list
+    environment:
+      STATIC_URL: ${file(./config/common.yml):staticURL}
+      TABLE_NAME: !Ref MediaTable
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:Query
+        Resource:
+          - Fn::GetAtt: [ MediaTable, Arn ]
+    events:
+      - http:
+          path: /v1/media/{id}
+          method: get
+          cors: true
+          request:
+            parameters:
+              paths:
+                id: true
+
+  remove:
+    handler: bin/remove
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:GetItem
+          - dynamodb:DeleteItem
+        Resource:
+          - Fn::GetAtt: [ MediaTable, Arn ]
+      - Effect: Allow
+        Action:
+          - sns:Publish
+        Resource:
+          - Ref: SNSTopic
+    environment:
+      TABLE_NAME: !Ref MediaTable
+      SNS_TOPIC_ARN: !Ref SNSTopic
+    events:
+      - http:
+          path: /v1/media/{id}/{mediaId}
+          method: delete
+          cors: true
+          request:
+            parameters:
+              paths:
+                id: true
+                mediaId: true
+
+  remove_s3_object:
+    handler: bin/remove_s3_object
+    environment:
+      MEDIA_BUCKET: ${self:custom.mediaBucket}
+    events:
+      - sns:
+          arn: !Ref SNSTopic
+          topicName: ${self:custom.TopicName}
+          filterPolicy:
+            event:
+              - RemoveObject
+
+resources:
+  Resources:
+    MediaApiGateway:
+      Type: AWS::ApiGateway::RestApi
+      Properties:
+        Name: ${self:custom.ApiGatewayName}
+        Description: Media API Gateway
+        BinaryMediaTypes:
+          - 'image/*'
+          - 'video/mp4'
+          - 'multipart/form-data'
+        EndpointConfiguration:
+          Types:
+            - REGIONAL
+
+    SNSTopic:
+      Type: AWS::SNS::Topic
+      Properties:
+        TopicName: ${self:custom.TopicName}
+        DisplayName: MediaEvents
+
+    MediaTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:custom.TableName}
+        AttributeDefinitions:
+          - AttributeName: ProductId
+            AttributeType: S
+          - AttributeName: MediaId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: ProductId
+            KeyType: HASH
+          - AttributeName: MediaId
+            KeyType: RANGE
+        ProvisionedThroughput:
+          ReadCapacityUnits: 2
+          WriteCapacityUnits: 2
+        Tags:
+          - Key: service
+            Value: ${self:custom.service}
+
+  Outputs:
+    MediaSNSTopic:
+      Value: !Ref SNSTopic
+      Export:
+        Name: Media-SNSTopic
+
+    MediaApiGatewayRestApiId:
+      Value: !Ref MediaApiGateway
+      Export:
+        Name: MediaApiGateway-RestApiId
+
+    MediaApiGatewayRestApiRootResourceId:
+      Value:
+        Fn::GetAtt:
+          - MediaApiGateway
+          - RootResourceId
+      Export:
+        Name: MediaApiGateway-RootResourceId

@@ -1,0 +1,11 @@
+# Node
+node_modules/
+
+# Serverless
+.serverless/
+
+# IDE
+.idea/
+
+# OS
+.DS_Store

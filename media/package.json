@@ -1,0 +1,7 @@
+{
+  "devDependencies": {
+    "serverless-iam-roles-per-function": "^3.2.0",
+    "serverless-offline": "^8.8.1",
+    "serverless-prune-plugin": "^2.0.1"
+  }
+}
