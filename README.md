@@ -16,9 +16,9 @@ The contribution is welcome.
 
 ## Microservices <a name="Microservices"></a>
 
-| Microservice                                                  | Language |
-|---------------------------------------------------------------|----------|
-| [Media Microservice](https://github.com/myarik/aws-samples)   | GO       |
+| Microservice                                                                 | Language |
+|------------------------------------------------------------------------------|----------|
+| [Media Microservice](https://github.com/myarik/aws-samples/tree/main/media)  | GO       |
 
 
 
