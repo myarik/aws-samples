@@ -43,3 +43,23 @@ The microservice provides three API endpoints for clients.
 - Delete the product's media content
 
 ![APIs](./assets/swagger.png)
+
+## Logging
+
+The service uses AWS CloudWatch for logging. CloudWatch has identified fields such as level, msg, service, etc. If we wanted to see only logs from the media microservice, we could use the following query:
+
+```shell
+fields @timestamp, level, msg
+| filter ispresent(level)
+| sort @timestamp desc
+| limit 20
+```
+
+![CloudWatch](./assets/cloudwatch.png)
+
+## Status
+
+The project is in progress. The following features are planned:
+
+- [ ] Add unit tests
+- [ ] Integrate with AWS X-Ray
