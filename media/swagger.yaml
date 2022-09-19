@@ -1,0 +1,107 @@
+openapi: "3.0.1"
+info:
+  title: "Media microservice"
+  version: "v1"
+servers:
+  - url: "https://<id>.execute-api.<region>.amazonaws.com/{basePath}"
+    variables:
+      basePath:
+        default: "v1"
+paths:
+  /v1/media/{id}:
+    get:
+      description: "Get product's media"
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Media"
+    post:
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MediaObject"
+  /v1/media/{id}/{mediaId}:
+    delete:
+      description: "Delete media"
+      parameters:
+        - name: "mediaId"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+        - name: "id"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+      responses:
+        '204':
+          description: successful operation
+components:
+  schemas:
+    Media:
+      type: object
+      properties:
+        media_id:
+          type: "string"
+          format: "uuid"
+        type:
+          type: "string"
+          enum:
+            - image
+            - video
+        url:
+          type: "string"
+          example: "https://example.com/image.jpg"
+        thumbnail_url:
+          type: "string"
+          example: "https://example.com/image_thumbnail.jpg"
+    MediaObject:
+      type: object
+      properties:
+        id:
+          type: "string"
+          format: "uuid"
+        product_id:
+          type: "string"
+          format: "uuid"
+        type:
+          type: "string"
+          enum:
+            - image
+            - video
+        url:
+          type: "string"
+          example: "https://example.com/image.jpg"
+        timestamp:
+          type: "integer"
+          example: 1663602143
