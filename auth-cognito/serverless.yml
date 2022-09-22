@@ -1,0 +1,70 @@
+service: service-${self:custom.service}
+
+plugins:
+  - serverless-prune-plugin
+
+frameworkVersion: '3'
+
+custom:
+  service: auth
+
+  # Only keep last 3 version on AWS
+  prune:
+    automatic: true
+    number: 3
+
+  UserPoolName: serverless-${self:custom.service}-pool
+  UserPoolClientName: serverless-${self:custom.service}-pool-client
+
+provider:
+  name: aws
+  runtime: go1.x
+  region: ${file(./config/common.yml):region}
+  memorySize: 128
+  logRetentionInDays: 7
+  stage: production
+
+  deploymentBucket:
+    name: ${file(./config/common.yml):deploymentBucket.name}
+    serverSideEncryption: ${file(./config/common.yml):deploymentBucket.serverSideEncryption}
+
+resources:
+  Resources:
+    AuthUserPool:
+      Type: AWS::Cognito::UserPool
+      Properties:
+        MfaConfiguration: OFF
+        UserPoolName: ${self:custom.UserPoolName}
+        UsernameConfiguration:
+          CaseSensitive: false
+        Schema:
+          - Name: email
+            Required: true
+            Mutable: true
+        Policies:
+          PasswordPolicy:
+            MinimumLength: 6
+
+    AuthUserClient:
+      Type: AWS::Cognito::UserPoolClient
+      Properties:
+        ClientName: ${self:custom.UserPoolClientName}
+        GenerateSecret: false
+        UserPoolId:
+          Ref: AuthUserPool
+        AccessTokenValidity: 5
+        ExplicitAuthFlows:
+          - "ADMIN_NO_SRP_AUTH"
+
+  Outputs:
+    AuthUserPoolId:
+      Value: !Ref AuthUserPool
+
+    AuthUserPoolClientId:
+      Value: !Ref AuthUserClient
+
+    AuthUserPoolArb:
+      Value:
+        Fn::GetAtt:
+          - AuthUserPool
+          - Arn
