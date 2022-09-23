@@ -63,7 +63,7 @@ resources:
     AuthUserPoolClientId:
       Value: !Ref AuthUserClient
 
-    AuthUserPoolArb:
+    AuthUserPoolArn:
       Value:
         Fn::GetAtt:
           - AuthUserPool
