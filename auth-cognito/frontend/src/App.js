@@ -6,7 +6,6 @@ import {AuthProvider, useAuth} from "./context/auth";
 /** Ant design stylesheet */
 import 'antd/dist/antd.css';
 
-
 // A wrapper for <Route> that redirects to the login
 // screen if you're not yet authenticated.
 function PrivateRoute({children}) {
@@ -36,7 +35,7 @@ function App() {
             <Routes>
                 <Route path="/" element={<Home/>}/>
                 <Route path="/dashboard"
-                    element={<PrivateRoute><Dashboard/></PrivateRoute>}
+                       element={<PrivateRoute><Dashboard/></PrivateRoute>}
                 />
                 <Route path="login"
                        element={<AnonymousRoute><Login/></AnonymousRoute>}/>

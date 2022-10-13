@@ -1,48 +1,40 @@
 import * as React from 'react'
-import {AUTH_USER_TOKEN_KEY} from "../utils/constants";
 
-// const jwtDecode = require('jwt-decode');
+/** Amplify config */
+import {AuthConfig} from '../config/auth';
+import {Amplify, Auth} from "aws-amplify";
+import {AUTH_USER_TOKEN_KEY} from "../utils/constants";
+import {User} from "../models/user";
+
+/** Configure amplify */
+Amplify.configure({Auth: AuthConfig});
+
 
 const AuthContext = React.createContext();
 
-// function validateToken(token) {
-//     if (!token) {
-//         return false;
-//     }
-//     return true;
-//     // try {
-//     //     let decodedJwt = jwtDecode(token);
-//     //     return decodedJwt.exp >= Date.now() / 1000;
-//     // } catch (e) {
-//     //     return false;
-//     // }
-// }
-
 function AuthProvider({children}) {
     const [isAuthenticated, setIsAuthenticated] = React.useState(false);
-    // const [token, setToken] = React.useState(null);
 
-    // React.useEffect(() => {
-    //     // Check if the user is logged in when the app loads
-    //     // let token = localStorage.getItem(AUTH_USER_TOKEN_KEY);
-    //     // if (token) {
-    //     //     setIsAuthenticated(true);
-    //     // }
-    //     // if (validateToken(token)) {
-    //     //     setIsAuthenticated(true);
-    //     //     // setToken(token);
-    //     // }
-    // });
+    React.useEffect(() => {
+        // Check if the user is logged in when the app loads
+        Auth.currentAuthenticatedUser()
+            .then((result) => {
+                setIsAuthenticated(true);
+                localStorage.setItem(AUTH_USER_TOKEN_KEY, JSON.stringify(new User(result)));
+            })
+            .catch(() => {
+                setIsAuthenticated(false);
+            });
+    }, []);
 
     const signIn = async (username, password) => {
         try {
-            // const result = await Auth.signIn(username, password);
-            // setUsername(result.username);
-            // setIsAuthenticated(true);
+            const result = await Auth.signIn(username, password);
+            localStorage.setItem(AUTH_USER_TOKEN_KEY, JSON.stringify(new User(result)));
             setIsAuthenticated(true);
-            // setToken('fake-token');
             return {success: true, message: ""};
         } catch (error) {
+            console.log('Error signing in user: ', error);
             return {
                 success: false,
                 message: "LOGIN FAIL",
@@ -52,11 +44,12 @@ function AuthProvider({children}) {
 
     const signOut = async () => {
         try {
-            // await Auth.signOut();
-            // setToken(null);
+            await Auth.signOut();
+            localStorage.removeItem(AUTH_USER_TOKEN_KEY);
             setIsAuthenticated(false);
             return {success: true, message: ""};
         } catch (error) {
+            console.log('Error signing out user: ', error);
             return {
                 success: false,
                 message: "LOGOUT FAIL",
