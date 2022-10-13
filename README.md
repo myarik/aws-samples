@@ -3,11 +3,11 @@
 This repository contains a set of example microservices for the AWS Cloud.
 
 ## Table of Contents
-1. [About this Repo](#About)
+1. [Index this Repo](#Index)
 2. [Microservices](#Microservices)
 
 
-## About this Repository <a name="About"></a>
+## Index this Repository <a name="Index"></a>
 
 This repository is a list of example codes. The repository is subdivided into sections for each microservice (see "Microservices"). Each microservice has its own subsection. These microservice provide a demonstration of common service implementation or infrastructure patterns that could be useful for building your infrastructure.
 
