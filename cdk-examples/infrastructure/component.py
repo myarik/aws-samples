@@ -11,6 +11,7 @@ from constructs import Construct
 import infrastructure.constants as constants
 from infrastructure.input_validation.construct import InputValidationLambdaConstruct
 from infrastructure.lambda_layers.construct import LambdaLayerConstruct
+from infrastructure.multi_layers.construct import MultiLayersLambdaConstruct
 from infrastructure.simple_lambda.construct import SimpleLambdaConstruct
 
 
@@ -34,6 +35,13 @@ class CdkExamplesStack(Stack):
             self,
             f"{construct_id}_input_validation_lambda",
             lambda_layers=[lambda_layer.input_validation_layer],
+        )
+
+        # Multiple lambda layers
+        MultiLayersLambdaConstruct(
+            self,
+            f"{construct_id}_multi_layers_lambda",
+            lambda_layers=[lambda_layer.common_layer, lambda_layer.multi_layers],
         )
 
     def _add_stack_tags(self) -> None:

@@ -11,3 +11,11 @@ class Order(BaseModel):
     id: int
     quantity: int
     description: str
+
+
+class JinjaTemplateInput(BaseModel):
+    """
+    Jinja template input schema
+    """
+    title: str
+    content: str
