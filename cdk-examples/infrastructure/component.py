@@ -1,6 +1,7 @@
 """
 Service stack
 """
+
 from aws_cdk import (
     Stack,
     Tags,
@@ -8,6 +9,7 @@ from aws_cdk import (
 from constructs import Construct
 
 import infrastructure.constants as constants
+from infrastructure.input_validation.construct import InputValidationLambdaConstruct
 from infrastructure.lambda_layers.construct import LambdaLayerConstruct
 from infrastructure.simple_lambda.construct import SimpleLambdaConstruct
 
@@ -25,6 +27,13 @@ class CdkExamplesStack(Stack):
             self,
             f"{construct_id}_simple_lambda",
             lambda_layers=[lambda_layer.common_layer],
+        )
+
+        # Input validation lambda function
+        InputValidationLambdaConstruct(
+            self,
+            f"{construct_id}_input_validation_lambda",
+            lambda_layers=[lambda_layer.input_validation_layer],
         )
 
     def _add_stack_tags(self) -> None:

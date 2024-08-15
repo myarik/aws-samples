@@ -8,6 +8,8 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = "^3.12"
 aws-lambda-powertools = "^2.43.1"
+pydantic = "^2.8.2"
+pydantic-settings = "^2.4.0"
 
 [tool.poetry.group.dev]
 optional = true
@@ -20,6 +22,10 @@ pytest = "^8.3.2"
 pytest-mock = "^3.14.0"
 "aws-cdk-aws-lambda-python-alpha" = "^2.151.0a0"
 pytest-cov = "^5.0.0"
+
+
+[tool.poetry.group.input_validation.dependencies]
+requests = "^2.32.3"
 
 [build-system]
 requires = ["poetry-core"]
