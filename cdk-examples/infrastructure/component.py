@@ -26,21 +26,21 @@ class CdkExamplesStack(Stack):
         # Create a simple lambda function
         SimpleLambdaConstruct(
             self,
-            f"{construct_id}_simple_lambda",
+            f"{construct_id}{constants.DELIMITER}simple_function",
             lambda_layers=[lambda_layer.common_layer],
         )
 
         # Input validation lambda function
         InputValidationLambdaConstruct(
             self,
-            f"{construct_id}_input_validation_lambda",
+            f"{construct_id}{constants.DELIMITER}input_validation",
             lambda_layers=[lambda_layer.input_validation_layer],
         )
 
         # Multiple lambda layers
         MultiLayersLambdaConstruct(
             self,
-            f"{construct_id}_multi_layers_lambda",
+            f"{construct_id}{constants.DELIMITER}multi_layers",
             lambda_layers=[lambda_layer.common_layer, lambda_layer.multi_layers],
         )
 

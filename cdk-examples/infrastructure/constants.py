@@ -5,8 +5,9 @@ Constants
 SERVICE_NAME_TAG = "service"
 OWNER_TAG = "owner"
 
-SERVICE_NAME = "CDK-EXAMPLES"
+SERVICE_NAME = "demo-cdk"
 LOG_LEVEL = "INFO"
+DELIMITER = "--"
 
 # Build folders
 BUILD_FOLDER = ".build/lambdas/"
