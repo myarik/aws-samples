@@ -14,6 +14,8 @@ class LambdaLayerConstruct(Construct):
         super().__init__(scope, construct_id)
         self.construct_id = construct_id
         self.common_layer = self._build_common_layer()
+        self.input_validation_layer = self._build_input_validation_layer()
+        self.multi_layers = self._build_multi_layers()
 
     def _build_common_layer(self) -> PythonLayerVersion:
         """
@@ -23,6 +25,30 @@ class LambdaLayerConstruct(Construct):
             self,
             f"{self.construct_id}_common",
             entry=constants.COMMON_LAYER_BUILD_FOLDER,
+            compatible_runtimes=[_lambda.Runtime.PYTHON_3_12],
+            removal_policy=RemovalPolicy.DESTROY,
+        )
+
+    def _build_input_validation_layer(self) -> PythonLayerVersion:
+        """
+        Build common layer
+        """
+        return PythonLayerVersion(
+            self,
+            f"{self.construct_id}_input_validation",
+            entry=constants.INPUT_VALIDATION_LAYER_BUILD_FOLDER,
+            compatible_runtimes=[_lambda.Runtime.PYTHON_3_12],
+            removal_policy=RemovalPolicy.DESTROY,
+        )
+
+    def _build_multi_layers(self) -> PythonLayerVersion:
+        """
+        Build common layer
+        """
+        return PythonLayerVersion(
+            self,
+            f"{self.construct_id}_multi_layers",
+            entry=constants.MULTI_LAYERS_LAYER_BUILD_FOLDER,
             compatible_runtimes=[_lambda.Runtime.PYTHON_3_12],
             removal_policy=RemovalPolicy.DESTROY,
         )

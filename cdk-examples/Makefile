@@ -30,6 +30,8 @@ deps:
 build: deps
 	mkdir -p .build/lambdas ; cp -r service .build/lambdas
 	mkdir -p .build/common_layer ; poetry export --without=dev --format=requirements.txt > .build/common_layer/requirements.txt
+	mkdir -p .build/input_validation_layer ; poetry export --with=input_validation --format=requirements.txt > .build/input_validation_layer/requirements.txt
+	mkdir -p .build/multi_layers ; poetry export --only=multi_layers --format=requirements.txt > .build/multi_layers/requirements.txt
 
 infra-tests: build
 	poetry run pytest -l -s --pdb tests/infrastructure
