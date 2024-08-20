@@ -253,3 +253,4 @@ lambda_requirements.txt
 .dccache
 node_modules/
 .ruff_cache
+.lambda_response.json

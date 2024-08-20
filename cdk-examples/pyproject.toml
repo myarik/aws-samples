@@ -7,7 +7,7 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.12"
-aws-lambda-powertools = "^2.43.1"
+aws-lambda-powertools =  {extras = ["tracer"],version = "^2.43.1"}
 pydantic = "^2.8.2"
 pydantic-settings = "^2.4.0"
 

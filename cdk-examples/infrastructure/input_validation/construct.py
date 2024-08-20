@@ -31,6 +31,7 @@ class InputValidationLambdaConstruct(Construct):
             handler="service.handlers.input_validation.lambda_handler",
             environment={
                 "POWERTOOLS_SERVICE_NAME": constants.SERVICE_NAME,  # for logger, tracer and metrics
+                "POWERTOOLS_TRACE_DISABLED": "true",  # for tracer
                 "LOG_LEVEL": constants.LOG_LEVEL,  # for logger
             },
             tracing=_lambda.Tracing.DISABLED,
