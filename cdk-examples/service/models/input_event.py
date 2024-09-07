@@ -1,21 +1,22 @@
 """
 Input event model
 """
-from pydantic import BaseModel
+
+from pydantic import BaseModel, HttpUrl
 
 
-class Order(BaseModel):
+class ServiceUrlInput(BaseModel):
     """
     Order schema
     """
-    id: int
-    quantity: int
-    description: str
+
+    url: HttpUrl
 
 
 class JinjaTemplateInput(BaseModel):
     """
     Jinja template input schema
     """
+
     title: str
     content: str

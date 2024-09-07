@@ -8,7 +8,6 @@ dev:
 # ensures poetry creates a local virtualenv (.venv)
 	poetry config --local virtualenvs.in-project true
 	poetry install --no-root
-	npm ci
 
 format:
 	poetry run ruff check . --fix
@@ -27,7 +26,7 @@ deps:
 	poetry export --only=dev --format=requirements.txt > dev_requirements.txt
 	poetry export --without=dev --format=requirements.txt > lambda_requirements.txt
 
-build: deps
+build:
 	mkdir -p .build/lambdas ; cp -r service .build/lambdas
 	mkdir -p .build/common_layer ; poetry export --without=dev --format=requirements.txt > .build/common_layer/requirements.txt
 	mkdir -p .build/input_validation_layer ; poetry export --with=input_validation --format=requirements.txt > .build/input_validation_layer/requirements.txt
@@ -43,7 +42,7 @@ coverage-tests:
 	poetry run pytest tests/service tests/infrastructure  --cov-config=.coveragerc --cov=service --cov-report xml
 
 deploy: build
-	npx cdk deploy --app="${PYTHON} ${PWD}/app.py" --require-approval=never
+	npx cdk deploy --app="${PYTHON} ${PWD}/app.py" --require-approval=never --parameters AlarmEmailAddress=${ALARM_EMAIL_ADDRESS}
 
 destroy:
 	npx cdk destroy --app="${PYTHON} ${PWD}/app.py" --force
