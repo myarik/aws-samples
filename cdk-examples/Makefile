@@ -42,7 +42,7 @@ coverage-tests:
 	poetry run pytest tests/service tests/infrastructure  --cov-config=.coveragerc --cov=service --cov-report xml
 
 deploy: build
-	npx cdk deploy --app="${PYTHON} ${PWD}/app.py" --require-approval=never
+	npx cdk deploy --app="${PYTHON} ${PWD}/app.py" --require-approval=never --parameters AlarmEmailAddress=${ALARM_EMAIL_ADDRESS}
 
 destroy:
 	npx cdk destroy --app="${PYTHON} ${PWD}/app.py" --force

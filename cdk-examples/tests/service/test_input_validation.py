@@ -1,3 +1,5 @@
+from unittest.mock import patch
+
 import pytest
 from pydantic import ValidationError
 
@@ -11,8 +13,10 @@ def test_lambda_handler():
         lambda_handler({"test": "value"}, context)
 
     with pytest.raises(ValidationError):
-        lambda_handler({"id": "a3", "quantity": 3, "description": "test"}, context)
+        lambda_handler({"url": "test"}, context)
 
-    assert (
-        lambda_handler({"id": 2, "quantity": 3, "description": "test"}, context) is None
-    )
+    with patch("requests.get") as mock_get:
+        mock_get.return_value.json.return_value = {"test": "value"}
+        assert lambda_handler({"url": "https://api.github.com"}, context) == {
+            "test": "value"
+        }
