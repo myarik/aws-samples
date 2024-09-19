@@ -3,11 +3,8 @@ PYTHON := ".venv/bin/python3"
 .ONESHELL:  # run all commands in a single shell, ensuring it runs within a local virtual env
 
 dev:
-	pip install --upgrade pip poetry
-	pre-commit install
-# ensures poetry creates a local virtualenv (.venv)
 	poetry config --local virtualenvs.in-project true
-	poetry install --no-root
+	poetry install --no-root --with dev
 
 format:
 	poetry run ruff check . --fix

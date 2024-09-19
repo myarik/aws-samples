@@ -51,7 +51,6 @@ class CdkExamplesStack(Stack):
         SimpleLambdaConstruct(
             self,
             f"{construct_id}{constants.DELIMITER}simple_function",
-            lambda_layers=[lambda_layer.common_layer],
         )
 
         # Input validation lambda function

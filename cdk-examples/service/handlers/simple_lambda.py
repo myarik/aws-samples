@@ -1,16 +1,12 @@
 """
 Simple lambda handler
 """
+
 from typing import Any
 
-from aws_lambda_powertools.utilities.typing import LambdaContext
 
-from service.handlers.settings import logger
-
-
-def lambda_handler(event: dict[str, Any], context: LambdaContext) -> None:
+def lambda_handler(event: dict[str, Any], context: Any) -> dict:
     """
     Simple lambda handler
     """
-    logger.info("Hello, world!", extra={"event": event})
-    print("Hello, world!")
+    return {"statusCode": 200, "body": "Hello from Lambda!"}

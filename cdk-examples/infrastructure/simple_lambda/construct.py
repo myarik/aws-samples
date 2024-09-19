@@ -37,7 +37,6 @@ class SimpleLambdaConstruct(Construct):
             retry_attempts=0,
             timeout=Duration.seconds(constants.HANDLER_LAMBDA_TIMEOUT),
             memory_size=constants.HANDLER_LAMBDA_MEMORY_SIZE,
-            layers=self.lambda_layers,
             # role=role,
             log_retention=RetentionDays.ONE_DAY,
             log_format=_lambda.LogFormat.JSON.value,
