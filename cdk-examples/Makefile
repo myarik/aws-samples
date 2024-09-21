@@ -20,8 +20,8 @@ mypy-lint:
 	poetry run mypy --pretty service cdk tests
 
 deps:
-	poetry export --only=dev --format=requirements.txt > dev_requirements.txt
-	poetry export --without=dev --format=requirements.txt > lambda_requirements.txt
+	poetry export --without-hashes --only=dev --format=requirements.txt > dev_requirements.txt
+	poetry export --without-hashes --without=dev --format=requirements.txt > lambda_requirements.txt
 
 build:
 	mkdir -p .build/lambdas ; cp -r service .build/lambdas
