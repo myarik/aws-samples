@@ -1,4 +1,4 @@
-# AWS Lambda Go CDK Template
+# AWS CDK Go Demo: Lambda Template
 
 This project serves as a template for creating and deploying AWS Lambda functions written in Go, using the AWS Cloud
 Development Kit (CDK) for infrastructure management.
