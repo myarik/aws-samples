@@ -19,6 +19,7 @@ The contribution is welcome.
 | ----------------------------------------------------------------------------------------------------------------------------------- | -------- |
 | [AWS CDK Go Demo: Lambda Template](https://github.com/myarik/aws-samples/tree/main/aws-cdk-go-lambda-template)                      | GO       |
 | [AWS CDK Python Demo: Lambda Template](https://github.com/myarik/aws-samples/tree/main/aws-cdk-python-lambda-template)              | Python   |
+| [AWS CDK Python Demo: LambdaURL Template](https://github.com/myarik/aws-samples/tree/main/aws-cdk-python-lambda-template)           | Python   |
 | [AWS CDK Python Demo: Customer Support Ticket Routing Architecture](https://github.com/myarik/aws-samples/tree/main/ticket-routing) | Python   |
 | [Media Microservice](https://github.com/myarik/aws-samples/tree/main/media)                                                         | GO       |
 | [Auth Microservice](https://github.com/myarik/aws-samples/tree/main/auth-cognito)                                                   | GO       |
