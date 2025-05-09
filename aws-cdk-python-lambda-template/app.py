@@ -3,13 +3,13 @@ import os
 
 import aws_cdk as cdk
 
-from infrastructure.component import CdkExamplesStack
+from infrastructure.component import PythonDemoStack
 
 from infrastructure.utils import get_stack_name
 
 app = cdk.App()
 
-CdkExamplesStack(
+PythonDemoStack(
     app,
     get_stack_name(),
     env=cdk.Environment(

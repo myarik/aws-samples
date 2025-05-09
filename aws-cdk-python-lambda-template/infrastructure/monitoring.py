@@ -2,10 +2,9 @@
 Monitoring module for the infrastructure package.
 """
 
-from aws_cdk import aws_cloudwatch as cloudwatch, Duration, CfnParameter
+from aws_cdk import aws_cloudwatch as cloudwatch, Duration
 from aws_cdk import aws_lambda as _lambda
 from aws_cdk import aws_sns as sns
-from aws_cdk import aws_sns_subscriptions as subscriptions
 from aws_cdk import aws_cloudwatch_actions as cloudwatch_actions
 from aws_cdk import aws_iam as iam
 from constructs import Construct
@@ -13,18 +12,16 @@ from constructs import Construct
 
 class MonitoringDashboard(Construct):
     def __init__(
-        self,
-        scope: Construct,
-        construct_id: str,
-        dashboard_name: str,
-        alarm_email_parameter: CfnParameter,
+            self,
+            scope: Construct,
+            construct_id: str,
+            dashboard_name: str
     ) -> None:
         super().__init__(scope, construct_id)
         self.construct_id = construct_id
         self.dashboard_name = dashboard_name
         self.dashboard = self._create_dashboard()
-        self.alarm_topic = self._create_alarm_topic(alarm_email_parameter)
-        self.add_account_lambda_metrics()
+        self.alarm_topic = self._create_alarm_topic()
 
     def _create_dashboard(self) -> cloudwatch.Dashboard:
         """
@@ -37,9 +34,9 @@ class MonitoringDashboard(Construct):
             start="-P24H",
         )
 
-    def _create_alarm_topic(self, alarm_email_parameter: CfnParameter) -> sns.Topic:
+    def _create_alarm_topic(self) -> sns.Topic:
         """
-        C alarm topic to the dashboard
+        Create an SNS topic for alarms
         """
         topic = sns.Topic(
             self,
@@ -55,64 +52,7 @@ class MonitoringDashboard(Construct):
                 resources=[topic.topic_arn],
             )
         )
-        topic.add_subscription(
-            subscriptions.EmailSubscription(alarm_email_parameter.value_as_string)
-        )
         return topic
-
-    def add_account_lambda_metrics(self):
-        """
-        Add graphs for the account's Lambda metrics:
-            - AccountConcurrency
-        """
-        # noinspection PyTypeChecker
-        self.dashboard.add_widgets(
-            cloudwatch.TextWidget(
-                markdown=f"## Lambda Account Metrics\n",
-                width=24,
-                height=2,
-            ),
-            cloudwatch.Row(
-                cloudwatch.GraphWidget(
-                    title="AccountConcurrency",
-                    width=24,
-                    height=6,
-                    left=[
-                        cloudwatch.Metric(
-                            metric_name="ClaimedAccountConcurrency",
-                            namespace="AWS/Lambda",
-                            statistic="Maximum",
-                            period=Duration.minutes(5),
-                        ),
-                        cloudwatch.Metric(
-                            metric_name="ConcurrentExecutions",
-                            namespace="AWS/Lambda",
-                            statistic="Maximum",
-                            period=Duration.minutes(5),
-                        ),
-                        cloudwatch.MathExpression(
-                            expression="(claimedAccountConcurrency/SERVICE_QUOTA(concurrentExecutions)) * 100",
-                            using_metrics={
-                                "claimedAccountConcurrency": cloudwatch.Metric(
-                                    metric_name="ClaimedAccountConcurrency",
-                                    namespace="AWS/Lambda",
-                                    statistic="Maximum",
-                                    period=Duration.minutes(5),
-                                ),
-                                "concurrentExecutions": cloudwatch.Metric(
-                                    metric_name="ConcurrentExecutions",
-                                    namespace="AWS/Lambda",
-                                    statistic="Maximum",
-                                    period=Duration.minutes(5),
-                                ),
-                            },
-                            period=Duration.minutes(5),
-                            label="concurrencyUtilization",
-                        ),
-                    ],
-                ),
-            ),
-        )
 
     def add_lambda_function_metrics(self, lambda_function: _lambda.Function) -> None:
         """
@@ -211,10 +151,10 @@ class MonitoringDashboard(Construct):
         )
 
     def add_p90_latency_lambda_alarm(
-        self,
-        construct_id: str,
-        lambda_function: _lambda.Function,
-        threshold_duration: Duration,
+            self,
+            construct_id: str,
+            lambda_function: _lambda.Function,
+            threshold_duration: Duration,
     ) -> None:
         """
         Add P90 latency alarm for the lambda function
@@ -234,14 +174,14 @@ class MonitoringDashboard(Construct):
         )
         alarm.add_alarm_action(cloudwatch_actions.SnsAction(self.alarm_topic))
 
-    def add_error_lambda_alarm(
-        self,
-        construct_id: str,
-        lambda_function: _lambda.Function,
-        threshold_max_count: int,
+    def add_error_rate_lambda_alarm(
+            self,
+            construct_id: str,
+            lambda_function: _lambda.Function,
+            threshold_max_count: int,
     ) -> None:
         """
-        Add error alarm for the lambda function
+        Add error rate alarm for the lambda function
         """
         alarm = cloudwatch.Alarm(
             self,
